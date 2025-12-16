@@ -76,14 +76,14 @@ A FastAPI application that acts as the interface between the web UI and the Pyth
     - **Success**: Returns 200 OK with the validated data.
     - **Failure**: Returns 400 Bad Request with specific error messages (e.g., "You cannot apply for STEM Extension without a STEM degree") which are displayed on the UI.
 
-#### `intake.py` (CLI Mock Agent)
+#### `tests/intake.py` (CLI Mock Agent)
 A standalone script for testing the flow without a web browser.
 - Simulates an interactive interview in the terminal.
 - Useful for quick verification of the `models.py` logic during development.
 
-#### `test_models.py` (Quality Assurance)
+#### `tests/test_models.py` (Quality Assurance)
 Contains unit tests using `pytest` to verify all validation rules defined in `models.py`.
-- Run with `pytest test_models.py`.
+- Run with `pytest`.
 
 ### Frontend Files (`/frontend`)
 
@@ -103,7 +103,7 @@ The main React component for user interaction.
 
 **Backend Unit Tests:**
 ```bash
-pytest
+python -m pytest
 ```
 
 **End-to-End Test:**
