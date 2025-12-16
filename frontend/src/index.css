@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    /* Tailwind v4 automatically handles reset, just apply theme colors */
+    background-color: #111827;
+    /* gray-900 */
+    color: white;
+  }
+}
