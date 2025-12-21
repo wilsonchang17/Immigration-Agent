@@ -65,10 +65,19 @@ npm run dev
 This file defines the data schema and legal rules.
 - **`DegreeLevel`, `OptStage`**: Enums restricting input values.
 - **`UserState`**: The main Pydantic model representing a student's status.
-- **Validators**:
-    - **`check_program_end_date`**: Ensures the program end date is reasonable (within 1 year future or 60 days past).
     - **`check_stem_eligibility`**: Prevents users from selecting "STEM Extension" without a "STEM Degree".
     - **`check_unemployment_limit`**: Enforces the 90-day (Post) and 150-day (STEM) unemployment caps.
+
+#### `calculators.py` (The Timeline Projector)
+Pure mathematical utility that projects key dates based on an anchor (e.g., Program End Date).
+- **`get_post_completion_opt_timeline`**: Calculates Earliest Filing, Latest Filing, and Grace Period.
+- **`get_stem_opt_timeline`**: Calculates STEM filing window and reporting deadlines.
+
+#### `validators.py` (The Rule Enforcer)
+Contains specific validation logic for immigration constraints. Used **after** data collection to verify compliance.
+- **`validate_application_timing`**: Checks if the application date is within the legal 90/60 window AND adheres to the **30-day I-20 rule**.
+- **`validate_start_date`**: Ensures the requested start date is within the allowed 60-day post-graduation window.
+- **`validate_unemployment_status`**: Verifies unemployment days against the 90/150 day regulatory limits.
 
 #### `api.py` (The Bridge)
 A FastAPI application that acts as the interface between the web UI and the Python validation logic.
@@ -111,3 +120,4 @@ python -m pytest
 2. Start Frontend (`npm run dev`).
 3. Open browser to `http://localhost:5173`.
 4. Try entering invalid combinations (e.g., Non-STEM degree + STEM Extension) to see validation in action.
+

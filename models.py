@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
@@ -24,6 +24,12 @@ class UserState(BaseModel):
     # OPT Specifics
     opt_stage: OptStage
     unemployment_days_used: int = Field(default=0, ge=0)
+    
+    # Validation / Timeline Inputs
+    opt_start_date: Optional[date] = None # The user selected start date
+    i20_issuance_date: Optional[date] = None # When DSO recommended OPT
+    application_submission_date: Optional[date] = None # When user filed
+    has_one_year_enrollment: bool = False # Eligibility check
 
     @field_validator("program_end_date")
     @classmethod
