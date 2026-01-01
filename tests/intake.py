@@ -1,10 +1,12 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add parent and backend directory to path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
 
 from datetime import datetime, date
 from pydantic import ValidationError
 from models import UserState, DegreeLevel, OptStage
+from calculators import get_post_completion_opt_timeline, get_stem_opt_timeline
 
 def get_input(prompt: str, required: bool = True) -> str:
     while True:

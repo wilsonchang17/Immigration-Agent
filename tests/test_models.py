@@ -1,6 +1,8 @@
-import pytest
-from datetime import date, timedelta
-from pydantic import ValidationError
+import os
+import sys
+# Add parent and backend directory to path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
+
 from models import UserState, DegreeLevel, OptStage
 
 # Helpers
