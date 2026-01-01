@@ -52,8 +52,10 @@ const IntakeForm: React.FC = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setValidation({ status: 'valid', data: data.data });
+                // Now data contains { status, user_state, timeline }
+                setValidation({ status: 'valid', data: data });
             } else {
+                // Handling FastAPI's validation error structure
                 setValidation({ status: 'invalid', errors: data.detail.errors });
             }
         } catch (err) {
@@ -134,8 +136,8 @@ const IntakeForm: React.FC = () => {
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, opt_stage: stage }))}
                                 className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${formData.opt_stage === stage
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                        : 'bg-black/20 text-gray-400 hover:bg-black/30'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                    : 'bg-black/20 text-gray-400 hover:bg-black/30'
                                     }`}
                             >
                                 {stage === 'STEM' ? 'STEM Ext' : `${stage}-Completion`}

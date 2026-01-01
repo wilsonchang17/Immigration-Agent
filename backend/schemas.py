@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Any, Literal
 
 class OptTimeline(BaseModel):
     earliest_filing: date
@@ -28,3 +28,13 @@ class OptTimeline(BaseModel):
             events.append((self.reporting_period_12_month, "12-Month Reporting Due"))
             
         return sorted(events, key=lambda x: x[0])
+
+class ValidationErrorDetail(BaseModel):
+    field: str
+    message: str
+
+class ValidationResponse(BaseModel):
+    status: Literal["valid", "invalid"]
+    user_state: Optional[Any] = None # Using Any to avoid circular import, or we import later
+    timeline: Optional[OptTimeline] = None
+    errors: Optional[List[ValidationErrorDetail]] = None

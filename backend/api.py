@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
-from models import UserState
+from models import UserState, OptStage
+from calculators import get_post_completion_opt_timeline, get_stem_opt_timeline
 
 app = FastAPI()
 
@@ -18,21 +19,29 @@ app.add_middleware(
 async def validate_user_state(data: dict):
     """
     Validates the user input against the UserState model.
-    Returns the validated UserState if successful.
+    Returns the validated UserState AND the projected timeline if successful.
     Raises 400 with specific error messages if validation fails.
     """
     try:
-        # Pydantic does the heavy lifting here based on models.py logic
+        # 1. Validate Input (Pydantic models.py)
         user_state = UserState(**data)
-        return {"status": "valid", "data": user_state.model_dump()}
+        
+        # 2. Calculate Timeline based on the validated state
+        timeline = None
+        if user_state.opt_stage == OptStage.POST_COMPLETION:
+            timeline = get_post_completion_opt_timeline(user_state.program_end_date)
+        elif user_state.opt_stage == OptStage.STEM_EXTENSION:
+            timeline = get_stem_opt_timeline(user_state.program_end_date)
+            
+        # 3. Return Unified Response
+        return {
+            "status": "valid",
+            "user_state": user_state.model_dump(),
+            "timeline": timeline.model_dump() if timeline else None
+        }
     except ValidationError as e:
-        # Return a structured list of errors for the frontend to display
-        # We simplify the error structure for easier frontend consumption
         errors = []
         for err in e.errors():
-            # Customize message based on error type if needed, 
-            # but usually err['msg'] from our custom validators is good.
-            # We want to map it to fields if possible, or just general errors.
             field = loc[-1] if (loc := err.get('loc')) else 'general'
             errors.append({
                 "field": str(field),
