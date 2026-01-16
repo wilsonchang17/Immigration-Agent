@@ -77,28 +77,28 @@ const IntakeForm: React.FC = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-xl text-white">
-            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/10">
-                <div className="p-3 bg-blue-600/20 rounded-xl">
-                    <Briefcase className="w-6 h-6 text-blue-400" />
+        <div className="max-w-2xl mx-auto p-6 bg-white/60 dark:bg-stone-800/60 backdrop-blur-lg border border-stone-300 dark:border-stone-700 rounded-2xl shadow-xl text-stone-800 dark:text-stone-100 transition-colors duration-300">
+            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-stone-300 dark:border-stone-700">
+                <div className="p-3 bg-stone-200 dark:bg-stone-700 rounded-xl">
+                    <Briefcase className="w-6 h-6 text-stone-600 dark:text-stone-300" />
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold">Immigration Intake</h2>
-                    <p className="text-sm text-gray-400">Validate your OPT eligibility status</p>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Validate your OPT eligibility status</p>
                 </div>
             </div>
 
             <div className="space-y-6">
                 {/* Degree Level */}
                 <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <label className="flex items-center gap-2 text-sm font-medium text-stone-600 dark:text-stone-300">
                         <GraduationCap className="w-4 h-4" /> Degree Level
                     </label>
                     <select
                         name="degree_level"
                         value={formData.degree_level}
                         onChange={handleChange}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full bg-stone-100 dark:bg-stone-900/50 border border-stone-300 dark:border-stone-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-stone-500 outline-none transition-all text-stone-800 dark:text-stone-100"
                     >
                         <option value="Bachelor">Bachelor</option>
                         <option value="Master">Master</option>
@@ -107,24 +107,24 @@ const IntakeForm: React.FC = () => {
                 </div>
 
                 {/* STEM Degree Checkbox */}
-                <div className="flex items-center gap-3 p-4 bg-black/20 rounded-lg border border-white/5">
+                <div className="flex items-center gap-3 p-4 bg-stone-100 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-700">
                     <input
                         type="checkbox"
                         name="is_stem_degree"
                         checked={formData.is_stem_degree}
                         onChange={handleChange}
                         id="stem-check"
-                        className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500 bg-gray-700"
+                        className="w-5 h-5 rounded border-stone-400 dark:border-stone-600 text-stone-600 focus:ring-stone-500 bg-stone-200 dark:bg-stone-700"
                     />
                     <label htmlFor="stem-check" className="text-sm font-medium cursor-pointer flex-1">
                         This is a STEM Degree
-                        <span className="block text-xs text-gray-500 mt-0.5">Required for STEM Extension</span>
+                        <span className="block text-xs text-stone-500 dark:text-stone-400 mt-0.5">Required for STEM Extension</span>
                     </label>
                 </div>
 
                 {/* Program End Date */}
                 <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <label className="flex items-center gap-2 text-sm font-medium text-stone-600 dark:text-stone-300">
                         <Calendar className="w-4 h-4" /> Program End Date
                     </label>
                     <input
@@ -132,14 +132,14 @@ const IntakeForm: React.FC = () => {
                         name="program_end_date"
                         value={formData.program_end_date}
                         onChange={handleChange}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]"
+                        className="w-full bg-stone-100 dark:bg-stone-900/50 border border-stone-300 dark:border-stone-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-stone-500 outline-none transition-all text-stone-800 dark:text-stone-100 dark:[color-scheme:dark]"
                     />
-                    <p className="text-xs text-gray-500">Must be within 1 year future or 60 days past.</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">Must be within 1 year future or 60 days past.</p>
                 </div>
 
                 {/* OPT Stage */}
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-300">OPT Stage</label>
+                    <label className="text-sm font-medium text-stone-600 dark:text-stone-300">OPT Stage</label>
                     <div className="grid grid-cols-3 gap-2">
                         {(['Pre', 'Post', 'STEM'] as OptStage[]).map((stage) => (
                             <button
@@ -147,8 +147,8 @@ const IntakeForm: React.FC = () => {
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, opt_stage: stage }))}
                                 className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${formData.opt_stage === stage
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'bg-black/20 text-gray-400 hover:bg-black/30'
+                                    ? 'bg-stone-600 dark:bg-stone-500 text-white shadow-lg shadow-stone-400/30 dark:shadow-stone-900/50'
+                                    : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 border border-stone-300 dark:border-stone-600'
                                     }`}
                             >
                                 {stage === 'STEM' ? 'STEM Ext' : `${stage}-Completion`}
@@ -159,7 +159,7 @@ const IntakeForm: React.FC = () => {
 
                 {/* Unemployment Days */}
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-300">
+                    <label className="text-sm font-medium text-stone-600 dark:text-stone-300">
                         Unemployment Days Used
                     </label>
                     <input
@@ -169,7 +169,7 @@ const IntakeForm: React.FC = () => {
                         onChange={handleChange}
                         min="0"
                         max="150"
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full bg-stone-100 dark:bg-stone-900/50 border border-stone-300 dark:border-stone-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-stone-500 outline-none transition-all text-stone-800 dark:text-stone-100"
                     />
                 </div>
 
@@ -177,7 +177,7 @@ const IntakeForm: React.FC = () => {
                 <button
                     onClick={handleValidate}
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-stone-600 to-stone-700 hover:from-stone-500 hover:to-stone-600 dark:from-stone-500 dark:to-stone-600 dark:hover:from-stone-400 dark:hover:to-stone-500 text-white font-semibold py-4 rounded-xl shadow-lg shadow-stone-400/30 dark:shadow-stone-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {loading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -188,7 +188,7 @@ const IntakeForm: React.FC = () => {
 
                 {/* Validation Feedback */}
                 {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-start gap-2">
+                    <div className="p-4 bg-red-100 dark:bg-red-500/10 border border-red-300 dark:border-red-500/20 rounded-xl text-red-700 dark:text-red-400 text-sm flex items-start gap-2">
                         <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                         {error}
                     </div>
@@ -237,7 +237,7 @@ const IntakeForm: React.FC = () => {
                 )}
 
                 {validation?.status === 'invalid' && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-4 bg-red-100 dark:bg-red-500/10 border border-red-300 dark:border-red-500/20 rounded-xl text-red-700 dark:text-red-400 space-y-2 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-2 font-semibold">
                             <AlertCircle className="w-5 h-5" />
                             Validation Failed
