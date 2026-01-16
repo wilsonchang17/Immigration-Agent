@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Briefcase, Calendar, GraduationCap, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Briefcase, Calendar, GraduationCap, AlertCircle, CheckCircle, Loader2, BookOpen } from 'lucide-react';
 
 // Types matching our Backend Pydantic models
-type DegreeLevel = 'Bachelor' | 'Master' | 'PhD';
 type OptStage = 'Pre' | 'Post' | 'STEM';
 
 interface ValidationResult {
     status: 'valid' | 'invalid';
-    data?: any;
+    data?: {
+        user_state: any;
+        timeline: any;
+        rag_context: {
+            text: string;
+            metadata: {
+                source: string;
+                breadcrumbs: string;
+                original_text: string;
+            };
+            distance: number;
+        }[];
+    };
     errors?: { field: string; message: string }[];
 }
 
@@ -184,12 +195,44 @@ const IntakeForm: React.FC = () => {
                 )}
 
                 {validation?.status === 'valid' && (
-                    <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2">
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-semibold">Validation Successful!</p>
-                            <p className="text-sm opacity-80 mt-1">Your data conforms to all immigration rules.</p>
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 flex items-start gap-2">
+                            <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-semibold">Validation Successful!</p>
+                                <p className="text-sm opacity-80 mt-1">Your data conforms to all immigration rules.</p>
+                            </div>
                         </div>
+
+                        {/* RAG Reference Section */}
+                        {validation.data?.rag_context && validation.data.rag_context.length > 0 && (
+                            <div className="mt-6 space-y-4 border-t border-white/10 pt-6">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-blue-400">
+                                    <BookOpen className="w-5 h-5" />
+                                    Regulatory Reference / 法規引用
+                                </h3>
+                                <div className="space-y-3">
+                                    {validation.data.rag_context.map((item, idx) => (
+                                        <div key={idx} className="p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-[10px] font-mono bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded uppercase tracking-wider">
+                                                    {item.metadata.source}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500 font-mono">
+                                                    Score: {(1 - item.distance).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-400 font-mono mb-2 italic">
+                                                {item.metadata.breadcrumbs}
+                                            </p>
+                                            <p className="text-sm text-gray-200 leading-relaxed line-clamp-4 hover:line-clamp-none transition-all">
+                                                {item.metadata.original_text}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

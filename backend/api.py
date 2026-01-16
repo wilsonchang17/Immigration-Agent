@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from models import UserState, OptStage
 from calculators import get_post_completion_opt_timeline, get_stem_opt_timeline
+from rag import retrieve_regulations
 
 app = FastAPI()
 
@@ -33,11 +34,16 @@ async def validate_user_state(data: dict):
         elif user_state.opt_stage == OptStage.STEM_EXTENSION:
             timeline = get_stem_opt_timeline(user_state.program_end_date)
             
-        # 3. Return Unified Response
+        # 3. Hybrid Verification via RAG (Retrieve Context)
+        rag_query = f"{user_state.opt_stage.value} OPT requirements unemployment limits"
+        rag_context = retrieve_regulations(rag_query)
+
+        # 4. Return Unified Response
         return {
             "status": "valid",
             "user_state": user_state.model_dump(),
-            "timeline": timeline.model_dump() if timeline else None
+            "timeline": timeline.model_dump() if timeline else None,
+            "rag_context": rag_context
         }
     except ValidationError as e:
         errors = []

@@ -4,3 +4,7 @@ pytest
 fastapi
 uvicorn
 python-multipart
+chromadb
+sentence-transformers
+beautifulsoup4
+lxml
