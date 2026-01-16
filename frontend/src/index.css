@@ -1,10 +1,9 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   body {
-    /* Tailwind v4 automatically handles reset, just apply theme colors */
-    background-color: #111827;
-    /* gray-900 */
-    color: white;
+    @apply bg-stone-100 text-stone-900 dark:bg-stone-900 dark:text-stone-100 transition-colors duration-300;
   }
 }
