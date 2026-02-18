@@ -1,6 +1,5 @@
 import os
 import chromadb
-from sentence_transformers import SentenceTransformer
 
 # Configuration
 DB_PATH = os.path.join(os.path.dirname(__file__), "chroma_db")
@@ -22,6 +21,8 @@ def get_client_and_collection():
 def get_model():
     global _model
     if _model is None:
+        # Lazy import avoids importing heavy ML stack when API routes are loaded.
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     return _model
 

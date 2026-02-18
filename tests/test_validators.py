@@ -16,13 +16,11 @@ from validators import (
 
 @pytest.fixture
 def base_user():
-    # Current mocked date is Dec 20, 2025.
-    # Program end must be recent (> 60 days prior triggers error).
-    # Let's set program end to Dec 1, 2025.
+    program_end = date.today() + timedelta(days=30)
     return UserState(
         degree_level=DegreeLevel.MASTER,
         is_stem_degree=True,
-        program_end_date=date(2025, 12, 1), 
+        program_end_date=program_end,
         opt_stage=OptStage.POST_COMPLETION,
         has_one_year_enrollment=True
     )
@@ -38,51 +36,47 @@ def test_validate_eligibility(base_user):
     assert "one academic year" in errors[0]
 
 def test_validate_application_timing(base_user):
-    # Program End: Dec 1, 2025
-    # Earliest (-90): Sep 2, 2025 (approx)
-    # Latest (+60): Jan 30, 2026 (approx)
+    earliest = base_user.program_end_date - timedelta(days=90)
+    latest = base_user.program_end_date + timedelta(days=60)
     
     # Case 1: Perfect timing
-    base_user.application_submission_date = date(2025, 11, 15)
-    base_user.i20_issuance_date = date(2025, 11, 1) # 14 days prior
+    base_user.application_submission_date = base_user.program_end_date - timedelta(days=10)
+    base_user.i20_issuance_date = base_user.application_submission_date - timedelta(days=14)
     assert not validate_application_timing(base_user)
     
     # Case 2: Too early
-    base_user.application_submission_date = date(2025, 8, 1)
+    base_user.application_submission_date = earliest - timedelta(days=1)
     errors = validate_application_timing(base_user)
     assert any("too early" in e for e in errors)
     
     # Case 3: Too late
-    base_user.application_submission_date = date(2026, 3, 1)
+    base_user.application_submission_date = latest + timedelta(days=1)
     errors = validate_application_timing(base_user)
     assert any("too late" in e for e in errors)
     
     # Case 4: I-20 30-day rule violation (Critical)
-    base_user.application_submission_date = date(2025, 12, 15)
-    base_user.i20_issuance_date = date(2025, 11, 1) # ~45 days old
+    base_user.application_submission_date = base_user.program_end_date + timedelta(days=10)
+    base_user.i20_issuance_date = base_user.application_submission_date - timedelta(days=45)
     errors = validate_application_timing(base_user)
     assert any("submitted" in e for e in errors) and any("days after I-20" in e for e in errors)
     
     # Case 5: Submitted before I-20 issuance
-    base_user.i20_issuance_date = date(2025, 12, 20) # Issued after submission
+    base_user.i20_issuance_date = base_user.application_submission_date + timedelta(days=5)
     errors = validate_application_timing(base_user)
     assert "Application date cannot be before I-20 issuance" in errors[0]
 
 def test_validate_start_date(base_user):
-    # Program End: Dec 1, 2025
-    # Window: Dec 2, 2025 - Jan 30, 2026 (approx 60 days)
-    
     # Case 1: Valid
-    base_user.opt_start_date = date(2026, 1, 15)
+    base_user.opt_start_date = base_user.program_end_date + timedelta(days=30)
     assert not validate_start_date(base_user)
     
     # Case 2: Too early (<= program end)
-    base_user.opt_start_date = date(2025, 12, 1)
+    base_user.opt_start_date = base_user.program_end_date
     errors = validate_start_date(base_user)
     assert "must be after" in errors[0]
     
     # Case 3: Too late (> 60 days)
-    base_user.opt_start_date = date(2026, 3, 1)
+    base_user.opt_start_date = base_user.program_end_date + timedelta(days=61)
     errors = validate_start_date(base_user)
     assert "more than 60 days" in errors[0]
 

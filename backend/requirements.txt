@@ -1,10 +1,16 @@
-pydantic>=2.0
+pydantic>=2.0,<3
 langgraph
 pytest
-fastapi
-uvicorn
-python-multipart
-chromadb
-sentence-transformers
-beautifulsoup4
-lxml
+fastapi>=0.110,<1
+uvicorn>=0.29,<1
+python-multipart>=0.0.9,<1
+chromadb>=0.5,<1
+# Pin ML stack to versions that work with environments where torch<=2.2.2 is the latest available wheel.
+numpy<2
+torch==2.2.2
+sentence-transformers==2.7.0
+transformers==4.41.2
+scikit-learn==1.4.2
+scipy==1.12.0
+beautifulsoup4>=4.12,<5
+lxml>=5,<6

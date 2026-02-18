@@ -1,5 +1,7 @@
 import os
 import re
+import shutil
+from datetime import datetime
 import chromadb
 from bs4 import BeautifulSoup
 from sentence_transformers import SentenceTransformer
@@ -161,14 +163,46 @@ def parse_xml_to_chunks(xml_path):
         
     return chunks
 
+def _backup_incompatible_db(db_path: str) -> str:
+    """
+    Move an incompatible Chroma DB directory to a timestamped backup path.
+    """
+    backup_path = f"{db_path}_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    shutil.move(db_path, backup_path)
+    return backup_path
+
+def _initialize_collection_with_recovery():
+    """
+    Initialize persistent Chroma collection.
+    If old on-disk schema is incompatible, back it up and rebuild.
+    """
+    try:
+        client = chromadb.PersistentClient(path=DB_PATH)
+        collection = client.get_or_create_collection(name=COLLECTION_NAME)
+        return client, collection
+    except Exception as e:
+        if "_type" not in str(e):
+            raise
+
+        if not os.path.exists(DB_PATH):
+            raise
+
+        backup_path = _backup_incompatible_db(DB_PATH)
+        print("Detected incompatible existing Chroma schema.")
+        print(f"Backed up old DB to: {backup_path}")
+        print("Rebuilding fresh ChromaDB store...")
+
+        client = chromadb.PersistentClient(path=DB_PATH)
+        collection = client.get_or_create_collection(name=COLLECTION_NAME)
+        return client, collection
+
 def main():
     print(f"Loading data from {DATA_PATH}...")
     chunks = parse_xml_to_chunks(DATA_PATH)
     print(f"Generated {len(chunks)} chunks.")
     
     print("Initializing ChromaDB...")
-    client = chromadb.PersistentClient(path=DB_PATH)
-    collection = client.get_or_create_collection(name=COLLECTION_NAME)
+    client, collection = _initialize_collection_with_recovery()
     
     print("Generating Embeddings and Upserting...")
     # Using a local model

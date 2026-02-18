@@ -1,110 +1,123 @@
 # F1/OPT Immigration Agent
 
-An Agentic AI System designed to assist international students (F1 Visa) with their OPT (Optional Practical Training) application timeline. This project establishes a strict "Source of Truth" for user status using Pydantic validation and provides a modern React interface for interaction.
+AI-assisted F1 OPT eligibility validator with a FastAPI backend, RAG-based regulation retrieval, and React frontend intake UI.
 
 ## Project Structure
 
 ```text
 Immigration-Agent/
-├── backend/            # FastAPI server & Core Python logic
-│   ├── api.py          # API Gateway
-│   ├── models.py       # Data validation models
-│   ├── calculators.py  # Timeline calculations
-│   └── validators.py   # Immigration rule enforcer
-├── frontend/           # React + Vite (Tailwind UI)
-├── tests/              # Unit and integration tests
-├── .gitignore          # Version control exclusions
-└── README.md           # Documentation
+├── backend/
+│   ├── api.py
+│   ├── models.py
+│   ├── calculators.py
+│   ├── rag.py
+│   ├── ingest_regs.py
+│   └── requirements.txt
+├── frontend/
+├── tests/
+└── README.md
 ```
 
-## Architecture
+## Stack
 
-The system consists of three main layers:
-1.  **Core Logic (`backend/models.py`)**: The central "Source of Truth". Uses Pydantic v2 to strictly enforce immigration rules (e.g., STEM eligibility, date limits).
-2.  **Backend API (`backend/api.py`)**: A lightweight FastAPI service that exposes the core logic to the frontend.
-3.  **Frontend (`/frontend`)**: A React + Vite application with Glassmorphism UI (TailwindCSS) for user intake.
+- Backend: FastAPI + Pydantic v2
+- RAG store: ChromaDB
+- Embeddings: Sentence Transformers
+- Frontend: React + Vite + Tailwind
 
----
-
-## Installation & Setup
+## Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- Node.js & npm
 
-### 1. Backend Setup
+- Python 3.11
+- Node.js 18+
 
-The backend handles data validation and business logic.
+### 1. Backend Install
+
+#### Version A: uv
 
 ```bash
-# 1. Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate
-
-# 2. Install Python dependencies
+cd /Users/wilson/Github/Immigration-Agent
+rm -rf .venv
+uv venv --python 3.11 --seed .venv
+source .venv/bin/activate
+which python
+python -m pip --version
 pip install -r backend/requirements.txt
 ```
 
-**Running the Backend:**
-```bash
-# Navigate to backend directory
-cd backend
+Expected `which python` output:
 
-# Starts the FastAPI server on http://localhost:8000
+```text
+/Users/wilson/Github/Immigration-Agent/.venv/bin/python
+```
+
+#### Version B: Standard Python venv
+
+```bash
+cd /Users/wilson/Github/Immigration-Agent
+rm -rf .venv
+/usr/local/bin/python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip setuptools wheel
+pip install -r backend/requirements.txt
+```
+
+### 2. Build RAG Index (first time only)
+
+```bash
+python backend/ingest_regs.py
+```
+
+This creates/updates `backend/chroma_db`.
+
+### 3. Run Backend
+
+```bash
+cd backend
 uvicorn api:app --reload
 ```
 
-### 2. Frontend Setup
+Backend URL: `http://localhost:8000`
 
-The frontend provides the user interface.
+Optional production-safe CORS:
 
 ```bash
-# 1. Navigate to the frontend directory
-cd frontend
-
-# 2. Install Node dependencies
-npm install
+export ALLOWED_ORIGINS="http://localhost:5173,https://your-frontend.example.com"
 ```
 
-**Running the Frontend:**
+### 4. Run Frontend
+
 ```bash
-# Starts the Vite dev server on http://localhost:5173
+cd frontend
+npm install
 npm run dev
 ```
 
----
+Frontend URL: `http://localhost:5173`
 
-## Codebase Explanation
+## API Notes
 
-### Core Backend Files (`/backend`)
-
-#### `models.py` (The Source of Truth)
-This file defines the data schema and legal rules.
-- **`DegreeLevel`, `OptStage`**: Enums restricting input values.
-- **`UserState`**: The main Pydantic model representing a student's status.
-
-#### `calculators.py` (The Timeline Projector)
-Pure mathematical utility that projects key dates based on an anchor.
-
-#### `validators.py` (The Rule Enforcer)
-Contains specific validation logic for immigration constraints used after data collection.
-
-#### `api.py` (The Bridge)
-A FastAPI application that acts as the interface between the web UI and the Python validation logic.
-
----
+- `POST /validate` validates intake payload via `UserState`.
+- `opt_stage=Post|STEM` returns computed `timeline`.
+- `opt_stage=Pre` returns `timeline=null` and `timeline_message` with guidance.
+- If local RAG index is missing/unavailable, API still returns valid response with `rag_warning` instead of failing.
 
 ## Testing
 
-**Backend Unit Tests:**
-Run tests from the project root:
+From project root:
+
 ```bash
 pytest tests/
 ```
 
-**End-to-End Test:**
-1. Start Backend (`cd backend && uvicorn api:app --reload`).
-2. Start Frontend (`cd frontend && npm run dev`).
-3. Open browser to `http://localhost:5173`.
-4. Try entering invalid combinations (e.g., Non-STEM degree + STEM Extension) to see validation in action.
+Notes:
 
+- `tests/test_rag_validation.py` stubs RAG retrieval; it does not require a prebuilt Chroma index.
+- Real runtime RAG references in `/validate` still require `python backend/ingest_regs.py`.
+
+## Troubleshooting
+
+- If `ingest_regs.py` fails with torch/numpy compatibility errors, recreate the venv and reinstall from `backend/requirements.txt`.
+- If ingestion fails with Chroma schema errors like `KeyError: '_type'`, rerun `python backend/ingest_regs.py`. The script now auto-backs up incompatible `backend/chroma_db` and rebuilds it.
+- Do not mix old global site-packages with the project venv.

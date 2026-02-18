@@ -4,12 +4,13 @@ from datetime import date, timedelta
 
 def test_validate_api():
     url = "http://localhost:8000/validate"
+    valid_program_end = (date.today() + timedelta(days=30)).isoformat()
     
     # 測試案例 1: 合法的 Post-Completion OPT 請求
     payload = {
         "degree_level": "Master",
         "is_stem_degree": True,
-        "program_end_date": "2025-05-15",
+        "program_end_date": valid_program_end,
         "opt_stage": "Post",
         "unemployment_days_used": 0,
         "has_one_year_enrollment": True
@@ -27,7 +28,8 @@ def test_validate_api():
             # 驗證 timeline 是否存在
             if "timeline" in data and data["timeline"]:
                 print("✅ Timeline calculated successfully!")
-                assert data["timeline"]["earliest_filing"] == "2025-02-14"
+                expected_earliest = (date.fromisoformat(valid_program_end) - timedelta(days=90)).isoformat()
+                assert data["timeline"]["earliest_filing"] == expected_earliest
             else:
                 print("❌ Timeline missing in response!")
         else:
@@ -39,7 +41,7 @@ def test_validate_api():
     invalid_payload = {
         "degree_level": "Master",
         "is_stem_degree": False,
-        "program_end_date": "2025-05-15",
+        "program_end_date": valid_program_end,
         "opt_stage": "STEM",
         "unemployment_days_used": 0
     }
