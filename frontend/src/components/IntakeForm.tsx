@@ -4,11 +4,22 @@ import { Briefcase, Calendar, GraduationCap, AlertCircle, CheckCircle, Loader2, 
 // Types matching our Backend Pydantic models
 type OptStage = 'Pre' | 'Post' | 'STEM';
 
+interface OptTimeline {
+    earliest_filing: string;
+    program_end: string;
+    latest_filing: string;
+    grace_period_end: string;
+    reporting_period_6_month?: string | null;
+    reporting_period_12_month?: string | null;
+}
+
 interface ValidationResult {
     status: 'valid' | 'invalid';
     data?: {
         user_state: any;
-        timeline: any;
+        timeline: OptTimeline | null;
+        timeline_message?: string | null;
+        rag_warning?: string | null;
         rag_context: {
             text: string;
             metadata: {
@@ -34,6 +45,33 @@ const IntakeForm: React.FC = () => {
     const [validation, setValidation] = useState<ValidationResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const formatDate = (isoDate: string) =>
+        new Date(isoDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+
+    const getTimelineEvents = (timeline: OptTimeline) => {
+        const labels: Record<string, string> = {
+            earliest_filing: 'Earliest Filing Date',
+            program_end: 'Program End Date',
+            latest_filing: 'Latest Filing Date',
+            grace_period_end: 'Grace Period End Date',
+            reporting_period_6_month: '6-Month Reporting Due',
+            reporting_period_12_month: '12-Month Reporting Due',
+        };
+
+        return Object.entries(timeline)
+            .filter(([, value]) => Boolean(value))
+            .map(([key, value]) => ({
+                key,
+                label: labels[key] || key,
+                date: value as string,
+            }))
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -204,28 +242,57 @@ const IntakeForm: React.FC = () => {
                             </div>
                         </div>
 
+                        {validation.data?.timeline && (
+                            <div className="space-y-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-900/40 p-4">
+                                <h3 className="text-base font-semibold text-stone-700 dark:text-stone-200">OPT Timeline</h3>
+                                <div className="space-y-2">
+                                    {getTimelineEvents(validation.data.timeline).map((event) => (
+                                        <div
+                                            key={event.key}
+                                            className="flex items-center justify-between rounded-lg border border-stone-200 dark:border-stone-700 px-3 py-2 text-sm"
+                                        >
+                                            <span className="text-stone-600 dark:text-stone-300">{event.label}</span>
+                                            <span className="font-medium text-stone-800 dark:text-stone-100">{formatDate(event.date)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {validation.data?.timeline_message && (
+                            <div className="rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-900/20 p-4 text-sm text-amber-800 dark:text-amber-200">
+                                {validation.data.timeline_message}
+                            </div>
+                        )}
+
+                        {validation.data?.rag_warning && (
+                            <div className="rounded-xl border border-yellow-300 dark:border-yellow-700 bg-yellow-100 dark:bg-yellow-900/20 p-4 text-sm text-yellow-800 dark:text-yellow-200">
+                                {validation.data.rag_warning}
+                            </div>
+                        )}
+
                         {/* RAG Reference Section */}
                         {validation.data?.rag_context && validation.data.rag_context.length > 0 && (
-                            <div className="mt-6 space-y-4 border-t border-white/10 pt-6">
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-blue-400">
+                            <div className="mt-6 space-y-4 border-t border-stone-300 dark:border-white/10 pt-6">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-blue-700 dark:text-blue-400">
                                     <BookOpen className="w-5 h-5" />
                                     Regulatory Reference / 法規引用
                                 </h3>
                                 <div className="space-y-3">
                                     {validation.data.rag_context.map((item, idx) => (
-                                        <div key={idx} className="p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all">
+                                        <div key={idx} className="p-4 bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 transition-all">
                                             <div className="flex justify-between items-start mb-2">
-                                                <span className="text-[10px] font-mono bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded uppercase tracking-wider">
+                                                <span className="text-[10px] font-mono bg-blue-600/20 dark:bg-blue-600/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded uppercase tracking-wider">
                                                     {item.metadata.source}
                                                 </span>
-                                                <span className="text-[10px] text-gray-500 font-mono">
+                                                <span className="text-[10px] text-stone-500 font-mono">
                                                     Score: {(1 - item.distance).toFixed(2)}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-400 font-mono mb-2 italic">
+                                            <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mb-2 italic">
                                                 {item.metadata.breadcrumbs}
                                             </p>
-                                            <p className="text-sm text-gray-200 leading-relaxed line-clamp-4 hover:line-clamp-none transition-all">
+                                            <p className="text-sm text-stone-700 dark:text-stone-200 leading-relaxed line-clamp-4 hover:line-clamp-none transition-all">
                                                 {item.metadata.original_text}
                                             </p>
                                         </div>
