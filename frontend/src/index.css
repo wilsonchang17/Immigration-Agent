@@ -1,9 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  :root {
+    font-family: 'Space Grotesk', 'Noto Sans TC', sans-serif;
+  }
+
   body {
-    @apply bg-stone-100 text-stone-900 dark:bg-stone-900 dark:text-stone-100 transition-colors duration-300;
+    @apply text-stone-900 dark:text-stone-100 transition-colors duration-300;
+    min-height: 100vh;
+    background-attachment: fixed;
+  }
+
+  * {
+    @apply antialiased;
   }
 }

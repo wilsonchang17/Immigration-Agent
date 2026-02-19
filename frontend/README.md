@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# Immigration Agent Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for the F1/OPT Immigration Agent.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- lucide-react (icons)
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18+
+- Backend API running at `http://localhost:8000` (or your configured base URL)
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+From this folder:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Edit `.env` if needed:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_API_BASE_URL=http://localhost:8000
 ```
+
+## Run in Development
+
+```bash
+npm run dev
+```
+
+Default app URL: `http://localhost:5173`
+
+## Build
+
+```bash
+npm run build
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Test
+
+```bash
+npm install
+npm run test:run
+```
+
+## Main Files
+
+- `src/App.tsx`: app shell (background + theme toggle + intake form)
+- `src/components/ThemeToggle.tsx`: dark/light theme persistence
+- `src/components/IntakeForm.tsx`: form state, API call, validation/timeline display
+
+## API Contract Used by Frontend
+
+Endpoint:
+
+- `POST /validate`
+
+Request body (example):
+
+```json
+{
+  "degree_level": "Master",
+  "is_stem_degree": true,
+  "program_end_date": "2026-05-13",
+  "opt_stage": "Post",
+  "unemployment_days_used": 0
+}
+```
+
+Success response includes:
+
+- `status`
+- `user_state`
+- `timeline`
+- `timeline_message`
+- `rag_context`
+- `rag_warning`
+
+Validation failure response:
+
+- `detail.status = "invalid"`
+- `detail.errors = [{ field, message }]`
+
+## Notes
+
+- Dates from backend are plain `YYYY-MM-DD`. The UI formats them in UTC to avoid timezone off-by-one display issues.
+- If backend is unreachable, the UI shows a connection error message.
