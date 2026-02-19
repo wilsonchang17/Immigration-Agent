@@ -18,7 +18,6 @@ const ThemeToggle: React.FC = () => {
     }
   }, [isDark]);
 
-  // 初次載入時也要設定
   useEffect(() => {
     const saved = localStorage.getItem('theme');
     const prefersDark = saved ? saved === 'dark' : true;
@@ -30,14 +29,10 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={() => setIsDark(!isDark)}
-      className="fixed top-4 right-4 z-50 p-3 rounded-full bg-stone-200 dark:bg-stone-700 border border-stone-300 dark:border-stone-600 shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
+      className="fixed right-6 top-6 z-50 rounded-full border border-stone-300 bg-white/80 p-3 text-stone-700 shadow-lg shadow-stone-400/25 backdrop-blur transition-all duration-300 hover:scale-110 hover:shadow-xl dark:border-stone-700 dark:bg-stone-900/80 dark:text-stone-100 dark:shadow-stone-900/30"
       aria-label="Toggle theme"
     >
-      {isDark ? (
-        <Sun className="w-5 h-5 text-amber-500" />
-      ) : (
-        <Moon className="w-5 h-5 text-stone-600" />
-      )}
+      {isDark ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-stone-600" />}
     </button>
   );
 };
